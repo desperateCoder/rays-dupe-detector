@@ -40,7 +40,9 @@ public class Main {
 
             List<String> files = getXmlFilesInFolder(System.getProperty("user.dir"));
 
+            System.out.println("\n## Scanning files for duplicates (Progress: each dot one file):");
             for (String fileName : files) {
+                System.out.print(".");
                 Document doc = db.parse(new File(fileName));
                 // optional, but recommended
                 // http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
@@ -100,6 +102,7 @@ public class Main {
             e.printStackTrace();
         }
 
+        System.out.println("\n");
         if (foundDuplicates.isEmpty()) {
             System.out.println("+++ You're fine - no findings! +++");
         } else {
@@ -114,12 +117,15 @@ public class Main {
     }
 
     private static List<String> getXmlFilesInFolder(String baseFolder) {
-        try (Stream<Path> walk = Files.walk(Paths.get(baseFolder), 1)) {
-            return walk
+        System.out.println("## Scanning for XML files in folder: "+baseFolder);
+        try (Stream<Path> walk = Files.walk(Paths.get(baseFolder))) {
+            List<String> files = walk
                     .filter(p -> !Files.isDirectory(p))   // not a directory
                     .map(Path::toString)                  // convert path to string
                     .filter(f -> f.endsWith("xml"))       // check end with
-                    .collect(Collectors.toList());        // collect all matched to a List
+                    .collect(Collectors.toList());// collect all matched to a List
+            System.out.println("-> found "+files.size()+" XML files.");
+            return files;
         } catch (IOException e) {
             e.printStackTrace();
         }
